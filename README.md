@@ -66,4 +66,4 @@ Contributing
 Contributions are welcome! If you find any bugs or have suggestions for new features, please open an issue or submit a pull request. 
 License 
 
-For any questions or feedback, feel free to contact me at your-email@example.com . 
+For any questions or feedback, feel free to contact me at caiquedias.se@gmail.com. 
