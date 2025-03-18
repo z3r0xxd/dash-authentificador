@@ -1,6 +1,3 @@
-Passa Bomb 
-Overview 
-
 Passa Bomb is a tool designed to simplify the process of sharing online game accounts with friends or team members. It allows you to store and manage multiple accounts along with their authentication details securely. With just one click, you can easily share account information while ensuring that sensitive data remains protected. 
 Features 
 
@@ -55,7 +52,7 @@ cd passa-bomb
 pip install customtkinter pyotp cryptography
  
 3 Install the required packages: 
-python gui.py
+pip install -r requirements.txt
  
     Use the interface to add new accounts, view existing ones, and manage them as needed.
     Ensure that you keep your encryption key (key.key) safe, as it is used to encrypt and decrypt your account data.
