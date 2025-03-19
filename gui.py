@@ -1,26 +1,28 @@
-# gui.py
-
 import customtkinter as ctk
 import pyotp
 import time
 import tkinter.messagebox as messagebox
-from main import load_data, save_data
+from utils import load_data, save_data
 from cryptography.fernet import Fernet
+import pygetwindow as gw
+import pyautogui
 
-# Configurar o tema do CustomTkinter
-ctk.set_appearance_mode("Dark")  # Tema escuro
-ctk.set_default_color_theme("blue")  # Tema azul
 
 class App(ctk.CTk):
     def __init__(self, accounts, key):
         super().__init__()
         self.title("Passa Bomb")
         self.geometry("900x600")
+
+        # Configurar o tema escuro personalizado
+        ctk.set_appearance_mode("Dark")  # Modo escuro
+        ctk.set_default_color_theme("green")  # Tema verde
+        
         self.key = key
         self.accounts = accounts  # Lista de contas carregadas
 
         # Frame principal
-        self.main_frame = ctk.CTkFrame(self)
+        self.main_frame = ctk.CTkFrame(self, fg_color="#000000")  # Fundo preto
         self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         # Título da Seção "Adicionar Conta"
@@ -28,35 +30,35 @@ class App(ctk.CTk):
             self.main_frame,
             text="Adicionar Nova Conta",
             font=("Arial", 18, "bold"),
-            anchor="w"
+            text_color="#00FF00"  # Verde neon
         )
         self.add_account_title.pack(fill="x", pady=(0, 10))
 
         # Frame para adicionar nova conta
-        self.add_account_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+        self.add_account_frame = ctk.CTkFrame(self.main_frame, fg_color="#1E1E1E")  # Cinza escuro
         self.add_account_frame.pack(fill="x")
 
         # Campos para nome, email e senha
-        self.name_entry = ctk.CTkEntry(self.add_account_frame, placeholder_text="Nome")
+        self.name_entry = ctk.CTkEntry(self.add_account_frame, placeholder_text="Nome", fg_color="#333333", border_color="#00FF00")
         self.name_entry.pack(fill="x", pady=5)
 
-        self.email_entry = ctk.CTkEntry(self.add_account_frame, placeholder_text="Email")
+        self.email_entry = ctk.CTkEntry(self.add_account_frame, placeholder_text="Email", fg_color="#333333", border_color="#00FF00")
         self.email_entry.pack(fill="x", pady=5)
 
-        self.password_entry = ctk.CTkEntry(self.add_account_frame, placeholder_text="Senha", show="*")
+        self.password_entry = ctk.CTkEntry(self.add_account_frame, placeholder_text="Senha", show="*", fg_color="#333333", border_color="#00FF00")
         self.password_entry.pack(fill="x", pady=5)
 
-        # Campo para a chave secreta do autenticador
-        self.secret_key_entry = ctk.CTkEntry(self.add_account_frame, placeholder_text="Chave Secreta do Autenticador")
+        self.secret_key_entry = ctk.CTkEntry(self.add_account_frame, placeholder_text="Chave Secreta do Autenticador", fg_color="#333333", border_color="#00FF00")
         self.secret_key_entry.pack(fill="x", pady=5)
 
         # Botão para adicionar conta
         self.add_button = ctk.CTkButton(
             self.add_account_frame,
             text="Adicionar Conta",
-            command=self.add_account,
-            fg_color="#2E8B57",  # Verde escuro
-            hover_color="#228B22"  # Verde mais escuro ao passar o mouse
+            command=self.add_account,  # Referência ao método add_account
+            fg_color="#00FF00",  # Verde neon
+            hover_color="#32CD32",  # Verde mais claro ao passar o mouse
+            text_color="black"
         )
         self.add_button.pack(fill="x", pady=10)
 
@@ -65,31 +67,19 @@ class App(ctk.CTk):
             self.main_frame,
             text="Contas Salvas",
             font=("Arial", 18, "bold"),
-            anchor="w"
+            text_color="#00FF00"  # Verde neon
         )
         self.saved_accounts_title.pack(fill="x", pady=(20, 10))
 
         # Frame para listar contas existentes
-        self.accounts_frame = ctk.CTkScrollableFrame(self.main_frame)
+        self.accounts_frame = ctk.CTkScrollableFrame(self.main_frame, fg_color="#1E1E1E")  # Cinza escuro
         self.accounts_frame.pack(fill="both", expand=True)
 
-        # Adicionar o texto "All Rights Reserved by z3r0 2025" na posição desejada
-        self.rights_label = ctk.CTkLabel(
-            self.main_frame,
-            text="Copyright © 2025 - All Rights Reserved - z3r0",
-            font=("Arial", 12),
-            anchor="center"
-        )
-        self.rights_label.pack(fill="x", pady=(10, 0))
-        
         # Atualizar a lista de contas
         self.update_accounts_list()
 
         # Iniciar a atualização automática dos tokens
         self.update_tokens()
-
-        # Configurar manipulador de eventos de fechamento
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def add_account(self):
         # Obter os valores dos campos
@@ -133,14 +123,14 @@ class App(ctk.CTk):
             account_frame.pack(fill="x", pady=5)
 
             # Nome e Email
-            info_label = ctk.CTkLabel(account_frame, text=f"{account['name']} ({account['email']})", font=("Arial", 14))
+            info_label = ctk.CTkLabel(account_frame, text=f"{account['name']} ({account['email']})", font=("Arial", 14), text_color="#00FFFF")  # Azul ciano
             info_label.pack(side="left", padx=10)
 
             # Token TOTP e Timer
-            token_label = ctk.CTkLabel(account_frame, text="Carregando...", font=("Arial", 12))
+            token_label = ctk.CTkLabel(account_frame, text="Carregando...", font=("Arial", 12), text_color="#00FF00")  # Verde neon
             token_label.pack(side="left", padx=10)
 
-            timer_label = ctk.CTkLabel(account_frame, text="Tempo restante: ", font=("Arial", 12))
+            timer_label = ctk.CTkLabel(account_frame, text="Tempo restante: ", font=("Arial", 12), text_color="#00FF00")  # Verde neon
             timer_label.pack(side="left", padx=10)
 
             # Botão para copiar os detalhes da conta
@@ -149,8 +139,9 @@ class App(ctk.CTk):
                 text="Copiar",
                 width=50,
                 command=lambda acc=account: self.copy_account_details(acc),
-                fg_color="#1E90FF",  # Azul claro
-                hover_color="#104E8B"  # Azul mais escuro ao passar o mouse
+                fg_color="#00FF00",  # Verde neon
+                hover_color="#32CD32",  # Verde mais claro ao passar o mouse
+                text_color="black"
             )
             copy_button.pack(side="right", padx=5)
 
@@ -160,10 +151,23 @@ class App(ctk.CTk):
                 text="Deletar",
                 width=50,
                 command=lambda acc=account: self.delete_account(acc),
-                fg_color="red",  # Vermelho
-                hover_color="darkred"  # Vermelho mais escuro ao passar o mouse
+                fg_color="#FF4500",  # Laranja neon
+                hover_color="#FF8C00",  # Laranja mais claro ao passar o mouse
+                text_color="white"
             )
             delete_button.pack(side="right", padx=5)
+
+            # Botão para logar no Tibia
+            login_button = ctk.CTkButton(
+                account_frame,
+                text="Logar",
+                width=50,
+                command=lambda acc=account: self.login_to_tibia(acc),
+                fg_color="#FFD700",  # Amarelo neon
+                hover_color="#FFA500",  # Laranja ao passar o mouse
+                text_color="black"
+            )
+            login_button.pack(side="right", padx=5)
 
             # Armazenar referências temporárias para os labels de token e timer
             account["token_label"] = token_label
@@ -177,8 +181,9 @@ class App(ctk.CTk):
             time_remaining = 30 - (int(time.time()) % 30)
 
             # Atualizar os labels
-            account["token_label"].configure(text=f"Token: {token}")
-            account["timer_label"].configure(text=f"Tempo restante: {time_remaining} segundos")
+            if "token_label" in account and "timer_label" in account:
+                account["token_label"].configure(text=f"Token: {token}")
+                account["timer_label"].configure(text=f"Tempo restante: {time_remaining} segundos")
 
         # Agendar a próxima atualização
         self.after(1000, self.update_tokens)
@@ -210,35 +215,48 @@ class App(ctk.CTk):
             # Remover a conta da lista
             self.accounts.remove(account)
 
-            # Salvar os dados atualizados
-            from main import save_data
-            save_data("data.json", self.key, self.accounts)
-
             # Atualizar a lista de contas na interface
             self.update_accounts_list()
 
             messagebox.showinfo("Sucesso", f"Conta '{account['name']}' deletada com sucesso!")
 
-    def on_closing(self):
-        print("Salvando dados antes de fechar...")
-        from main import save_data
-        save_data("data.json", self.key, self.accounts)
-        self.destroy()
+    def login_to_tibia(self, account):
+        # Gerar o token TOTP
+        totp = pyotp.TOTP(account["totp_secret"])
+        token = totp.now()
 
+        # Copiar o token para o clipboard
+        self.clipboard_clear()
+        self.clipboard_append(token)
+        self.update()
 
-if __name__ == "__main__":
-    # Carregar chave de criptografia
-    try:
-        with open("key.key", "rb") as key_file:
-            key = key_file.read()
-    except FileNotFoundError:
-        key = Fernet.generate_key()
-        with open("key.key", "wb") as key_file:
-            key_file.write(key)
+        # Localizar a janela do Tibia
+        try:
+            tibia_windows = gw.getWindowsWithTitle("Tibia")  # Altere "Tibia" para o título correto
+            if not tibia_windows:
+                messagebox.showerror("Erro", "Janela do Tibia não encontrada!")
+                return
 
-    # Carregar contas existentes (ou usar uma lista vazia para teste)
-    accounts = load_data("data.json", key)
+            tibia_window = tibia_windows[0]  # Pega a primeira janela encontrada
+            if tibia_window.isMinimized:
+                tibia_window.restore()  # Restaura a janela se estiver minimizada
+            tibia_window.activate()  # Ativa a janela
+            time.sleep(1)  # Aguarda um momento para garantir que a janela esteja ativa
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao ativar a janela do Tibia: {e}")
+            return
 
-    # Iniciar a interface gráfica
-    app = App(accounts, key)
-    app.mainloop()
+        # Preencher os campos automaticamente
+        try:
+            # Digitar o email
+            email = account["email"]
+            pyautogui.write(email, interval=0.02)  # Digita o email rapidamente
+
+            pyautogui.press("tab")  # Avança para o próximo campo (senha)
+
+            # Digitar a senha
+            pyautogui.write(account["password"], interval=0.02)  # Digita a senha rapidamente
+            pyautogui.press("enter")  # Pressiona Enter para enviar o formulário
+
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao tentar logar: {e}")
