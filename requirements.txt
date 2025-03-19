@@ -1,3 +1,5 @@
 pyotp
 cryptography
 customtkinter
+pyautogui
+pygetwindow
